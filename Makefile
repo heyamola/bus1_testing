@@ -127,7 +127,7 @@ tt: tests tt-prepare
 		run_tests ; (R=$$? ; dmesg ; exit $$R)
 .PHONY: tt
 
-semih:
+536_project:
 	-sudo sh -c 'dmesg -c > /dev/null'
 	-sudo sh -c 'rmmod bus$(BUS1EXT)'
 	sudo sh -c 'insmod ipc/bus1/bus$(BUS1EXT).ko'

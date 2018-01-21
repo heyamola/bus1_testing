@@ -160,26 +160,30 @@ static void test_io2(unsigned int number_of_iteration, unsigned long file_size)
 	unsigned long base;
 	int i;
 
-	fprintf(stderr, "UDS took %lu ns without payload SOCK_SEQPACKET\n", 
+	test_iterate_uds(number_of_iteration, 1024, SOCK_SEQPACKET);
+
+	fprintf(stderr, "UDS took %lu ns without payload\n", 
 		test_iterate_uds(number_of_iteration, 0, SOCK_SEQPACKET));
 
-	fprintf(stderr, "UDS took %lu ns with %lu byte SOCK_SEQPACKET\n", 
+	fprintf(stderr, "UDS took %lu ns with %lu byte\n", 
 		test_iterate_uds(number_of_iteration, file_size, SOCK_SEQPACKET), file_size);
 
+
+	test_iterate(number_of_iteration, 0, file_size);
 	base = test_iterate(number_of_iteration, 0, file_size);
 
 	fprintf(stderr, "it took %lu ns for no destinations\n", base);
 	fprintf(stderr, "it took %lu ns + %lu ns for one destination without payload\n", 
 		base, test_iterate(number_of_iteration, 1, 0) - base);
 
-	fprintf(stderr, "it took %lu ns + %lu ns for one destination with %lu byte: %lu\n", base,
+	fprintf(stderr, "it took %lu ns + %lu ns for one destination byte: %lu\n", base,
 		test_iterate(number_of_iteration, 1, file_size) - base, file_size);
 
 	for (i = 1; i < 9; ++i) {
 		unsigned int dests = 1UL << i;
 
 		fprintf(stderr, "it took %lu ns + %lu ns per destination for %u destinations byte: %lu\n",
-			base, (test_iterate(100000 >> i, dests, file_size) - base) / dests, dests, file_size);
+			base, (test_iterate(number_of_iteration >> i, dests, file_size) - base) / dests, dests, file_size);
 	}
 }
 
@@ -210,21 +214,27 @@ static void test_io(void)
 	}
 }
 
+void payload_size_test(int number_of_iteration){
+	int i;
+	int base_size = 256;
+	for(i = 0; i < 5; i++){
+		fprintf(stderr, "TEST CASE: %d byte: %d\n", i+1, base_size << i);
+		test_io2(number_of_iteration, base_size << i );
+		fprintf(stderr, "\n\n");
+	}
+}
+
 int main(int argc, char **argv)
 {
-	int r,i;
-	int base_size = 100;
+	int r;
+	int number_of_iteration = 100000;
 	r = test_parse_argv(argc, argv);
 	if (r > 0) {
 		//test_io();
 	}
 
-
-	for(i = 0; i < 4; i++){
-		fprintf(stderr, "TEST CASE: %d byte: %d\n", i+1, base_size << (i * 2));
-		test_io2(100000, base_size << (i * 2));
-		fprintf(stderr, "\n\n");
-	}
+	payload_size_test(number_of_iteration);
+	
 
 	return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
